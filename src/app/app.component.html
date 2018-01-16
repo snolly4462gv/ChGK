@@ -1,3 +1,7 @@
+<input *ngIf="QFlag" class="input-Q" [(ngModel)]="QString" placeholder="Команды, ответившие правильно">
+<button *ngIf="QFlag" (click)="QAnswerApl()">Внести</button>
+<button *ngIf="QFlag" (click)="QAllAdd()">Внести всех</button>
+<button *ngIf="QFlag" (click)="QAllDel()">Удалить всех</button>
 <div id="START_PAGE">
   <div *ngIf="isNewGame">
     <p >Кол-во вопросов</p>
