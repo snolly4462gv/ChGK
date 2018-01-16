@@ -10,27 +10,19 @@ import { MainService } from "../app/core/main.service";
 export class AppComponent implements OnInit{
   isNewGame:boolean = true;
   Players:UserModel[] = [];
+  QuestCount:number = 12;
+  TeamsCount:number = 0;
   GameMatrix:Array<number>; 
   Result:string="";
-  QuestCount:number = 12;
   QFlag:boolean = false;
   QString:string = "";
   QCurr:number = 0;
+
   constructor(private service:MainService){}
 
   ngOnInit(){
     this.GetPlayers();
-    this.GameMatrix = this.NewMatrixArray(2,this.QuestCount,0);
-  }
-
-  CreateGame() {
-    this.BuildTable();
-    this.isNewGame = false;
-  }
-
-  GetPlayers(){
-    this.Players = this.service.GetPlayers();
-    console.log(this.Players);
+    this.GameMatrix = this.NewMatrixArray(this.TeamsCount,this.QuestCount,0);
   }
 
   NewMatrixArray(rows,columns,val){
@@ -38,12 +30,22 @@ export class AppComponent implements OnInit{
     for(var i=0; i<rows; i++){
       arr[i] = new Array();
       for(var j=0; j<columns; j++){
-        arr[i][j] = val;//вместо i+j+1 пишем любой наполнитель. В простейшем случае - null
+        arr[i][j] = val;
       }
     }
     return arr;
   }
   
+  CreateGame() {
+    this.BuildTable();
+    this.isNewGame = false;
+  }
+
+  GetPlayers(){
+    this.Players = this.service.GetPlayers();
+    this.TeamsCount = this.Players.length;
+  }
+
   BuildTable(){
     var x = document.createElement("TABLE");
     x.setAttribute("id", "myTable");
@@ -59,7 +61,17 @@ export class AppComponent implements OnInit{
     document.getElementById("myTr").appendChild(z);
 
     var z = document.createElement("TD");
-    var t = document.createTextNode("Name");
+    var t = document.createTextNode("Название");
+    z.appendChild(t);
+    document.getElementById("myTr").appendChild(z);
+
+    var z = document.createElement("TD");
+    var t = document.createTextNode("Категория");
+    z.appendChild(t);
+    document.getElementById("myTr").appendChild(z);
+
+    var z = document.createElement("TD");
+    var t = document.createTextNode("Зачет");
     z.appendChild(t);
     document.getElementById("myTr").appendChild(z);
 
@@ -80,12 +92,27 @@ export class AppComponent implements OnInit{
       var y = document.createElement("TR");
       y.setAttribute("id", "myTr"+count);
       document.getElementById("myTable").appendChild(y);
+      
       var z = document.createElement("TD");
       var t = document.createTextNode(player.id+"");
       z.appendChild(t);
       document.getElementById("myTr"+count).appendChild(z);
+
       var z = document.createElement("TD");
       var t = document.createTextNode(player.first_name+"");
+      z.setAttribute("id", "pl_name_"+count);
+      z.appendChild(t);
+      document.getElementById("myTr"+count).appendChild(z);
+
+      var z = document.createElement("TD");
+      var t = document.createTextNode(player.category+"");
+      z.setAttribute("id", "pl_cat_"+count);
+      z.appendChild(t);
+      document.getElementById("myTr"+count).appendChild(z);
+
+      var z = document.createElement("TD");
+      var t = document.createTextNode(player.in_game+"");
+      z.setAttribute("id", "pl_ingame_"+count);
       z.appendChild(t);
       document.getElementById("myTr"+count).appendChild(z);
 
@@ -115,10 +142,8 @@ QAnswer(i:number){
 }
 
 QAnswerApl(){
-  console.log(this.QCurr," | ",this.QString);
+  this.QString = this.QString.trim();
   let answers:string[] = this.QString.split(" ");
-  console.log(answers);
-  
   for (let i=0;i<answers.length;i++){
     if(+answers[i]-1<this.GameMatrix.length){
       let player = +answers[i];
@@ -128,26 +153,32 @@ QAnswerApl(){
   }
   console.log(this.GameMatrix);
   this.QAnswer(this.QCurr);
+  this.GetResult();
 }
+
 QAllAdd(){
-  for(let i=0;i<2;i++){
+  for(let i=0;i<this.TeamsCount;i++){
     let player = i+1;
     this.GameMatrix[i][this.QCurr-1] = 1;
     document.getElementById("cell_"+player+"_"+this.QCurr).style.backgroundColor="green";
   }
   this.QAnswer(this.QCurr);
+  this.GetResult();
 }
+
 QAllDel(){
-  for(let i=0;i<2;i++){
+  for(let i=0;i<this.TeamsCount;i++){
     let player = i+1;
     this.GameMatrix[i][this.QCurr-1] = 0;
     document.getElementById("cell_"+player+"_"+this.QCurr).style.backgroundColor="white";
   }
   this.QAnswer(this.QCurr);
+  this.GetResult();
 }
  
+
+
 tableClick(player,question) {
-   
     if (this.GameMatrix[player-1][question-1] == 0){ this.GameMatrix[player-1][question-1] = 1;
       document.getElementById("cell_"+player+"_"+question).style.backgroundColor="green";
     }
@@ -158,13 +189,17 @@ tableClick(player,question) {
     this.GetResult();
   }
 
+
 GetResult(){
   this.Result = "ok "+this.GameMatrix[0]+"   ("+this.SumArray(this.GameMatrix,0)+") ";
+
 }  
 
 SumArray(arr:Array<number>,n){
   let sum = 0;
-  for(let i=0;i<this.QuestCount;i++){ console.log(n,i);sum+=arr[n][i];}
+  for(let i=0;i<this.QuestCount;i++)
+    sum+=arr[n][i];
   return sum;
 }
+
 }

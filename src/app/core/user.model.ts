@@ -7,8 +7,7 @@ export class UserModel{
         public phone?: string,
         public image_id?: number,
         public address?: string,
-        public coworking_id?: number,
-        public created_at?: Date,
-        public updated_at?: Date
+        public category?:string,
+        public in_game?:string
     ){}
 }

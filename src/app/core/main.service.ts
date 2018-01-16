@@ -27,11 +27,15 @@ export class MainService{
       [
         {
           "id": 1,
-          "first_name": "One"
+          "first_name": "One",
+          "category": "Младшая",
+          "in_game":"Да"
         },
         {
           "id": 2,
-          "first_name": "Two"
+          "first_name": "Two",
+          "category": "Старшая",
+          "in_game":"Да"
         }
       ]
     }
