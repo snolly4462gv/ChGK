@@ -15,11 +15,15 @@ export class AppComponent implements OnInit{
   TeamsCount:number = 0;
   GameMatrix:Array<number>; 
   GameRating:number[] = [];
+  GameScore:number[] = [];
   GameInGameRating:number[] = [];
+  GameAllQuestionRating:number[]=[];
+  GameInGameQuestionRating:number[]=[];
   Result:string="";
   QFlag:boolean = false;
   QString:string = "";
   QCurr:number = 0;
+  HaveResult:boolean = false;
 
   constructor(private service:MainService){}
 
@@ -83,9 +87,10 @@ export class AppComponent implements OnInit{
       if(i%(this.QuestCount+1)!=0){
         let q = i - Math.floor(i/(this.QuestCount+1));
         z.setAttribute("id","cell_num_q_"+q);
-      z.onclick = ()=>{
-      this.QAnswer(i);
-      };}
+        z.onclick = ()=>{
+        this.QAnswer(i);
+        };
+      }
 
       if(i%(this.QuestCount+1)==0)
         var t = document.createTextNode("");
@@ -209,7 +214,6 @@ QAllDel(){
 }
  
 
-
 tableClick(player,question) {
   let q = question-Math.floor(question/(this.QuestCount+1));
   console.log(q);
@@ -224,32 +228,31 @@ tableClick(player,question) {
   }
 
 
-GetResult(){
-  console.log(this.GameMatrix);
+
+  GetResult(){
+  //console.log(this.GameMatrix);
   //this.Result = "ok "+this.GameMatrix[0]+"   ("+this.SumArray(this.GameMatrix,0)+") ";
-  
+  this.GameScore = [];
   for (let j=1;j<=this.RaundCount;j++)
   for(let i=1;i<=this.TeamsCount;i++){
     
     document.getElementById("cell_res_"+i+"_"+j).removeChild( document.getElementById("cell_res_"+i+"_"+j).lastChild);
     var cell = document.getElementById("pl_id_"+i).textContent+"."+this.SumArray(this.GameMatrix,i-1,j-1);
+    
     if(j>1)cell+=":"+this.SumArrayAll(this.GameMatrix,i-1,j);
     var t = document.createTextNode(cell+"");
     document.getElementById("cell_res_"+i+"_"+j).appendChild(t);
 
   }
 
+  for(let i=0;i<this.TeamsCount;i++)
+    this.GameScore[i] = this.SumArrayAll(this.GameMatrix,i,this.RaundCount);
+
   this.GetAllGameRating();
   this.GetInGameRating();
 
-  this.Result = "";
-  for(let i=0;i<this.TeamsCount;i++){
-    let u=i+1;
-    var id = document.getElementById("pl_id_"+u).textContent;
-    var ratingInGame = this.GameInGameRating[i]+"";
-      if(!ratingInGame||ratingInGame=="undefined") ratingInGame = "";
-    this.Result += id+") Score:"+ " Rating: "+this.GameRating[i]+" "+ratingInGame+" || ";
-  }
+  this.AllResultTable();
+  this.CategoryResultsTable()
 
 }
 
@@ -262,11 +265,12 @@ GetAllGameRating(){
       rtq+=this.GameMatrix[j][i];
     }
     rtq = this.TeamsCount -rtq + 1;
+    this.GameAllQuestionRating[i] = rtq;
     for(let j=0;j<this.GameMatrix.length;j++){
      if(this.GameMatrix[j][i]==1)this.GameRating[j]+=rtq;
     }
   }
-  console.log(this.GameRating);
+  console.log(`rating Q`,this.GameAllQuestionRating);
  // this.Result = "  ||  "+ this.GameRating+"";
 }
 
@@ -285,6 +289,7 @@ GetInGameRating(){
       rtq+=this.GameMatrix[j][i];
     }
     rtq = this.GameInGameRating.length -rtq + 1;
+    this.GameInGameQuestionRating[i] = rtq;
     for(let j=0;j<this.GameMatrix.length;j++){
       let u = j+1;
       if(document.getElementById("pl_ingame_"+u).textContent=="Да")
@@ -292,7 +297,7 @@ GetInGameRating(){
     }
   }
  // this.Result += "  |  "+this.GameInGameRating+"";
-  
+ console.log(`rating Q in Game`,this.GameInGameQuestionRating);
 }
 
 SumArray(arr:Array<number>,n,m){
@@ -310,6 +315,119 @@ SumArrayAll(arr:Array<number>,n,m){
     sum+=arr[n][i];
   }
   return sum;
+}
+
+AllResultTable(){
+  this.Result = "";
+
+  for(let i=0;i<this.TeamsCount;i++){
+    let u=i+1;
+    var id = document.getElementById("pl_id_"+u).textContent;
+    var ratingInGame = this.GameInGameRating[i]+"";
+      if(!ratingInGame||ratingInGame=="undefined") ratingInGame = "";
+    //this.Result += id+") Score:"+ " Rating: "+this.GameRating[i]+" "+ratingInGame+" || ";
+  }
+
+  if(this.HaveResult) for(let i=0;i<this.TeamsCount+1;i++)
+  document.getElementById("resultTable").removeChild(document.getElementById("resultTable").lastChild);
+
+  this.HaveResult = true;
+
+  var y = document.createElement("TR");
+  document.getElementById("resultTable").appendChild(y);
+  y.setAttribute("id", "myResTr");
+
+  var z = document.createElement("TD");
+  var t = document.createTextNode("ID");
+  z.appendChild(t);
+  document.getElementById("myResTr").appendChild(z);
+  
+  var z = document.createElement("TD");
+  var t = document.createTextNode("Name");
+  z.appendChild(t);
+  document.getElementById("myResTr").appendChild(z);
+
+  var z = document.createElement("TD");
+  var t = document.createTextNode("Score");
+  z.appendChild(t);
+  document.getElementById("myResTr").appendChild(z);
+
+  var z = document.createElement("TD");
+  var t = document.createTextNode("Rating");
+  z.appendChild(t);
+  document.getElementById("myResTr").appendChild(z);
+
+  var z = document.createElement("TD");
+  var t = document.createTextNode("AllRating");
+  z.appendChild(t);
+  document.getElementById("myResTr").appendChild(z);
+
+
+  for(let i=0;i<this.TeamsCount;i++){
+    let u=i+1;
+    var id = document.getElementById("pl_id_"+u).textContent;
+    var name = document.getElementById("pl_name_"+u).textContent;
+    var score = this.GameScore[i]+"";
+    var ratingInGame = this.GameInGameRating[i]+"";
+    var ratingAll = this.GameRating[i]+"";
+      if(!ratingInGame||ratingInGame=="undefined") ratingInGame = "";
+    //this.Result += id+") Score:"+ " Rating: "+this.GameRating[i]+" "+ratingInGame+" || ";
+
+    var y = document.createElement("TR");
+    document.getElementById("resultTable").appendChild(y);
+    y.setAttribute("id", "myResTr"+u);
+  
+    var z = document.createElement("TD");
+    var t = document.createTextNode(id);
+    z.appendChild(t);
+    document.getElementById("myResTr"+u).appendChild(z);
+    
+    var z = document.createElement("TD");
+    var t = document.createTextNode(name);
+    z.appendChild(t);
+    document.getElementById("myResTr"+u).appendChild(z);
+  
+    var z = document.createElement("TD");
+    var t = document.createTextNode(score);
+    z.appendChild(t);
+    document.getElementById("myResTr"+u).appendChild(z);
+  
+    var z = document.createElement("TD");
+    var t = document.createTextNode(ratingInGame);
+    z.appendChild(t);
+    document.getElementById("myResTr"+u).appendChild(z);
+  
+    var z = document.createElement("TD");
+    var t = document.createTextNode(ratingAll);
+    z.appendChild(t);
+    document.getElementById("myResTr"+u).appendChild(z);
+  
+    // var z = document.createElement("TD");
+    // var t = document.createTextNode("Rating");
+    // z.appendChild(t);
+    // document.getElementById("myResTr"+u).appendChild(z);
+  
+    // var z = document.createElement("TD");
+    // var t = document.createTextNode("Rating");
+    // z.appendChild(t);
+    // document.getElementById("myResTr"+u).appendChild(z);
+
+
+
+
+
+
+  }
+
+  
+
+
+
+
+}
+
+CategoryResultsTable(){
+  
 }
 
 }
