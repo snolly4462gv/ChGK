@@ -10,6 +10,7 @@ import { MainService } from "../app/core/main.service";
 export class AppComponent implements OnInit{
   isNewGame:boolean = true;
   Players:UserModel[] = [];
+  Categories:string[] = [];
   QuestCount:number = 12;
   RaundCount:number = 3;
   TeamsCount:number = 0;
@@ -24,6 +25,7 @@ export class AppComponent implements OnInit{
   QString:string = "";
   QCurr:number = 0;
   HaveResult:boolean = false;
+  HaveResultCat:boolean = false;
 
   constructor(private service:MainService){}
 
@@ -427,7 +429,94 @@ AllResultTable(){
 }
 
 CategoryResultsTable(){
-  
+  this.Categories = [];
+  for(let i=1;i<=this.TeamsCount;i++){
+    let ctg = document.getElementById("pl_cat_"+i).textContent;
+    let notNew = false;
+    for(let cc of this.Categories) if(cc==ctg) notNew = true;
+     if(!notNew) this.Categories.push(ctg);
+     }
+     console.log('cat',this.Categories);
+
+
+     if(this.HaveResultCat) for(let i=0;i<this.Categories.length;i++)
+     document.getElementById("CATEGOR_TABLES").removeChild(document.getElementById("CATEGOR_TABLES").lastChild);
+    this.HaveResultCat = true;
+
+
+     for(let k=0;k<this.Categories.length;k++){
+
+          var x = document.createElement("TABLE_CAT");
+          x.style.padding = "40px";
+          x.setAttribute("id", "myTableCat_"+k);
+          document.getElementById("CATEGOR_TABLES").appendChild(x);
+
+         
+          var y = document.createElement("TR");
+          document.getElementById("myTableCat_"+k).appendChild(y);
+          y.setAttribute("id", "myResTrCat_"+k);
+        
+          var z = document.createElement("TD");
+          var t = document.createTextNode("ID");
+          z.appendChild(t);
+          document.getElementById("myResTrCat_"+k).appendChild(z);
+
+          var z = document.createElement("TD");
+          var t = document.createTextNode("Name");
+          z.appendChild(t);
+          document.getElementById("myResTrCat_"+k).appendChild(z);
+
+          var z = document.createElement("TD");
+          var t = document.createTextNode("Score");
+          z.appendChild(t);
+          document.getElementById("myResTrCat_"+k).appendChild(z);
+          
+        
+        
+          for(let i=0;i<this.TeamsCount;i++){
+            let u=i+1;
+
+            if(document.getElementById("pl_cat_"+u).textContent==this.Categories[k]){
+            var id = document.getElementById("pl_id_"+u).textContent;
+             var name = document.getElementById("pl_name_"+u).textContent;
+             var score = this.GameScore[i]+"";
+             
+            // var ratingInGame = this.GameInGameRating[i]+"";
+            // var ratingAll = this.GameRating[i]+"";
+            //   if(!ratingInGame||ratingInGame=="undefined") ratingInGame = "";
+            //this.Result += id+") Score:"+ " Rating: "+this.GameRating[i]+" "+ratingInGame+" || ";
+            
+            var y = document.createElement("TR");
+            document.getElementById( "myTableCat_"+k).appendChild(y);
+            y.setAttribute("id", "myResTrCategory"+u);
+          
+            var z = document.createElement("TD");
+            var t = document.createTextNode(id);
+            z.appendChild(t);
+            document.getElementById("myResTrCategory"+u).appendChild(z);
+
+            var z = document.createElement("TD");
+            var t = document.createTextNode(name);
+            z.appendChild(t);
+            document.getElementById("myResTrCategory"+u).appendChild(z);
+
+            var z = document.createElement("TD");
+            var t = document.createTextNode(score);
+            z.appendChild(t);
+            document.getElementById("myResTrCategory"+u).appendChild(z);
+
+          }
+            
+            
+          }
+          
+ 
+     
+    }
+
+
 }
+
+
 
 }
