@@ -1,4 +1,4 @@
-<div id="QUICK_ANSWER">
+<div *ngIf="QFlag" id="QUICK_ANSWER" style="padding:20px;">
   <input *ngIf="QFlag" class="input-Q" [(ngModel)]="QString" placeholder="Команды, ответившие правильно">
   <button *ngIf="QFlag" (click)="QAnswerApl()">Внести</button>
   <button *ngIf="QFlag" (click)="QAllAdd()">Внести всех</button>
@@ -18,8 +18,19 @@
 
 <!-- ТУТ ТАБЛИЦА-->
 
-
-<div id="RESULT_PAGE">
+<div *ngIf="!isNewGame" id="RESULT_PAGE">
+    <h3 >РЕЗУЛЬТАТЫ</h3>
     <p>{{Result}}</p>
-</div>  
+    <table>
+      <tr>
+        <td>Id</td>
+        <td>Name</td>
+        <td>Score</td>
+        <td>Rating</td>
+        <td>Category Rating</td>
+        <td>All Rating</td>
+        <td>All Category Rating</td>
+      </tr>
+    </table>
+</div> 
 

@@ -137,7 +137,7 @@ export class AppComponent implements OnInit{
         if(i%(this.QuestCount+1)==0){
           z.setAttribute("id","cell_res_"+count+"_"+Math.floor(i/this.QuestCount));
           z.style.backgroundColor = "cornflowerblue";
-          
+          z.style.color = "white";
         }
         else 
         {
@@ -232,7 +232,9 @@ GetResult(){
   for(let i=1;i<=this.TeamsCount;i++){
     
     document.getElementById("cell_res_"+i+"_"+j).removeChild( document.getElementById("cell_res_"+i+"_"+j).lastChild);
-    var t = document.createTextNode(this.SumArray(this.GameMatrix,i-1,j-1)+"");
+    var cell = document.getElementById("pl_id_"+i).textContent+"."+this.SumArray(this.GameMatrix,i-1,j-1);
+    if(j>1)cell+=":"+this.SumArrayAll(this.GameMatrix,i-1,j);
+    var t = document.createTextNode(cell+"");
     document.getElementById("cell_res_"+i+"_"+j).appendChild(t);
 
   }
@@ -298,6 +300,14 @@ SumArray(arr:Array<number>,n,m){
   for(let i=0;i<this.QuestCount;i++)
   {
     sum+=arr[n][i+m*this.QuestCount];
+  }
+  return sum;
+}
+SumArrayAll(arr:Array<number>,n,m){
+  let sum = 0;
+  for(let i=0;i<this.QuestCount*m;i++)
+  {
+    sum+=arr[n][i];
   }
   return sum;
 }
