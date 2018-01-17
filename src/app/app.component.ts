@@ -11,8 +11,11 @@ export class AppComponent implements OnInit{
   isNewGame:boolean = true;
   Players:UserModel[] = [];
   QuestCount:number = 12;
+  RaundCount:number = 3;
   TeamsCount:number = 0;
   GameMatrix:Array<number>; 
+  GameRating:number[] = [];
+  GameInGameRating:number[] = [];
   Result:string="";
   QFlag:boolean = false;
   QString:string = "";
@@ -22,7 +25,7 @@ export class AppComponent implements OnInit{
 
   ngOnInit(){
     this.GetPlayers();
-    this.GameMatrix = this.NewMatrixArray(this.TeamsCount,this.QuestCount,0);
+    this.GameMatrix = this.NewMatrixArray(this.TeamsCount,this.QuestCount*this.RaundCount,0);
   }
 
   NewMatrixArray(rows,columns,val){
@@ -75,18 +78,27 @@ export class AppComponent implements OnInit{
     z.appendChild(t);
     document.getElementById("myTr").appendChild(z);
 
-    for(let i=1;i<=this.QuestCount;i++){
+    for(let i=1;i<=this.QuestCount*this.RaundCount+3;i++){
       var z = document.createElement("TD");
-      var t = document.createTextNode(i+"");
-      z.appendChild(t);
-      z.setAttribute("id","cell_num_q_"+i);
+      if(i%(this.QuestCount+1)!=0){
+        let q = i - Math.floor(i/(this.QuestCount+1));
+        z.setAttribute("id","cell_num_q_"+q);
       z.onclick = ()=>{
-        this.QAnswer(i);
-      };
+      this.QAnswer(i);
+      };}
+
+      if(i%(this.QuestCount+1)==0)
+        var t = document.createTextNode("");
+      else 
+        var t = document.createTextNode(i%(this.QuestCount+1)+"");
+        z.appendChild(t);
+       
+        
       document.getElementById("myTr").appendChild(z);
     }
 
     let count = 1;
+
     for(let player of this.Players){
 
       var y = document.createElement("TR");
@@ -95,6 +107,7 @@ export class AppComponent implements OnInit{
       
       var z = document.createElement("TD");
       var t = document.createTextNode(player.id+"");
+      z.setAttribute("id", "pl_id_"+count);
       z.appendChild(t);
       document.getElementById("myTr"+count).appendChild(z);
 
@@ -116,12 +129,26 @@ export class AppComponent implements OnInit{
       z.appendChild(t);
       document.getElementById("myTr"+count).appendChild(z);
 
+
       //ответная таблица
-      for(let i=1;i<=this.QuestCount;i++){
+      for(let i=1;i<=this.QuestCount*this.RaundCount+3;i++){
         var z = document.createElement("TD");
-        z.setAttribute("id","cell_"+count+"_"+i);
-        var t = document.createTextNode("");
+        
+        if(i%(this.QuestCount+1)==0){
+          z.setAttribute("id","cell_res_"+count+"_"+Math.floor(i/this.QuestCount));
+          z.style.backgroundColor = "cornflowerblue";
+          
+        }
+        else 
+        {
+        let q= i -Math.floor(i/(this.QuestCount+1));
+          z.setAttribute("id","cell_"+count+"_"+q);
+        }
+
+      //  var t = document.createTextNode(z.id);
+       var t = document.createTextNode("");
         z.appendChild(t);
+        if(i%(this.QuestCount+1)!=0)
         z.onclick = ()=>{
           this.tableClick(player.id,i);
         };
@@ -132,13 +159,18 @@ export class AppComponent implements OnInit{
 }
 
 QAnswer(i:number){
+ 
+  let q = i - Math.floor(i/(this.QuestCount+1));
+  console.log(i,q);
+  if(this.QFlag&&q==this.QCurr||!this.QFlag){
   if(this.QFlag)
-    document.getElementById("cell_num_q_"+i).style.backgroundColor="white";
+    document.getElementById("cell_num_q_"+q).style.backgroundColor="white";
   else 
-  document.getElementById("cell_num_q_"+i).style.backgroundColor="red";
+  document.getElementById("cell_num_q_"+q).style.backgroundColor="red";
   this.QFlag = !this.QFlag;
   this.QString = "";
-  this.QCurr = i;
+  this.QCurr = q;
+}
 }
 
 QAnswerApl(){
@@ -148,7 +180,7 @@ QAnswerApl(){
     if(+answers[i]-1<this.GameMatrix.length){
       let player = +answers[i];
     this.GameMatrix[player-1][this.QCurr-1] = 1;
-    document.getElementById("cell_"+player+"_"+this.QCurr).style.backgroundColor="green";
+    document.getElementById("cell_"+player+"_"+this.QCurr).style.backgroundColor="#4CAF50";
     }
   }
   console.log(this.GameMatrix);
@@ -160,7 +192,7 @@ QAllAdd(){
   for(let i=0;i<this.TeamsCount;i++){
     let player = i+1;
     this.GameMatrix[i][this.QCurr-1] = 1;
-    document.getElementById("cell_"+player+"_"+this.QCurr).style.backgroundColor="green";
+    document.getElementById("cell_"+player+"_"+this.QCurr).style.backgroundColor="#4CAF50";
   }
   this.QAnswer(this.QCurr);
   this.GetResult();
@@ -179,26 +211,94 @@ QAllDel(){
 
 
 tableClick(player,question) {
-    if (this.GameMatrix[player-1][question-1] == 0){ this.GameMatrix[player-1][question-1] = 1;
-      document.getElementById("cell_"+player+"_"+question).style.backgroundColor="green";
+  let q = question-Math.floor(question/(this.QuestCount+1));
+  console.log(q);
+    if (this.GameMatrix[player-1][q-1] == 0){ this.GameMatrix[player-1][q-1] = 1;
+      document.getElementById("cell_"+player+"_"+q).style.backgroundColor="#4CAF50";
     }
     else { 
-      this.GameMatrix[player-1][question-1] = 0;
-      document.getElementById("cell_"+player+"_"+question).style.backgroundColor="white";
+      this.GameMatrix[player-1][q-1] = 0;
+      document.getElementById("cell_"+player+"_"+q).style.backgroundColor="white";
     }
     this.GetResult();
   }
 
 
 GetResult(){
-  this.Result = "ok "+this.GameMatrix[0]+"   ("+this.SumArray(this.GameMatrix,0)+") ";
+  console.log(this.GameMatrix);
+  //this.Result = "ok "+this.GameMatrix[0]+"   ("+this.SumArray(this.GameMatrix,0)+") ";
+  
+  for (let j=1;j<=this.RaundCount;j++)
+  for(let i=1;i<=this.TeamsCount;i++){
+    
+    document.getElementById("cell_res_"+i+"_"+j).removeChild( document.getElementById("cell_res_"+i+"_"+j).lastChild);
+    var t = document.createTextNode(this.SumArray(this.GameMatrix,i-1,j-1)+"");
+    document.getElementById("cell_res_"+i+"_"+j).appendChild(t);
 
-}  
+  }
 
-SumArray(arr:Array<number>,n){
+  this.GetAllGameRating();
+  this.GetInGameRating();
+
+  this.Result = "";
+  for(let i=0;i<this.TeamsCount;i++){
+    let u=i+1;
+    var id = document.getElementById("pl_id_"+u).textContent;
+    var ratingInGame = this.GameInGameRating[i]+"";
+      if(!ratingInGame||ratingInGame=="undefined") ratingInGame = "";
+    this.Result += id+") Score:"+ " Rating: "+this.GameRating[i]+" "+ratingInGame+" || ";
+  }
+
+}
+
+GetAllGameRating(){
+  this.GameRating = [];
+  for(let i=0;i<this.TeamsCount;i++)this.GameRating.push(0);
+  for(let i=0;i<this.QuestCount*this.RaundCount;i++){
+    let rtq = 0;
+    for(let j=0;j<this.GameMatrix.length;j++){
+      rtq+=this.GameMatrix[j][i];
+    }
+    rtq = this.TeamsCount -rtq + 1;
+    for(let j=0;j<this.GameMatrix.length;j++){
+     if(this.GameMatrix[j][i]==1)this.GameRating[j]+=rtq;
+    }
+  }
+  console.log(this.GameRating);
+ // this.Result = "  ||  "+ this.GameRating+"";
+}
+
+GetInGameRating(){
+  this.GameInGameRating = [];
+
+  for(let i=1;i<=this.TeamsCount;i++)
+    if(document.getElementById("pl_ingame_"+i).textContent=="Да")
+      this.GameInGameRating.push(0);
+
+  for(let i=0;i<this.QuestCount*this.RaundCount;i++){
+    let rtq = 0;
+    for(let j=0;j<this.GameMatrix.length;j++){
+      let u = j+1;
+      if(document.getElementById("pl_ingame_"+u).textContent=="Да")
+      rtq+=this.GameMatrix[j][i];
+    }
+    rtq = this.GameInGameRating.length -rtq + 1;
+    for(let j=0;j<this.GameMatrix.length;j++){
+      let u = j+1;
+      if(document.getElementById("pl_ingame_"+u).textContent=="Да")
+     if(this.GameMatrix[j][i]==1)this.GameInGameRating[j]+=rtq;
+    }
+  }
+ // this.Result += "  |  "+this.GameInGameRating+"";
+  
+}
+
+SumArray(arr:Array<number>,n,m){
   let sum = 0;
   for(let i=0;i<this.QuestCount;i++)
-    sum+=arr[n][i];
+  {
+    sum+=arr[n][i+m*this.QuestCount];
+  }
   return sum;
 }
 

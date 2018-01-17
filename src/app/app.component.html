@@ -9,6 +9,9 @@
   <div *ngIf="isNewGame">
     <p >Кол-во вопросов</p>
     <input [(ngModel)]="QuestCount" placeholder="name">
+    <p >Кол-во раундов</p>
+    <input [(ngModel)]="RaundCount" placeholder="name">
+    <br><br>
     <button  (click)="CreateGame()">Построить</button>
   </div>
 </div>

@@ -36,6 +36,12 @@ export class MainService{
           "first_name": "Two",
           "category": "Старшая",
           "in_game":"Да"
+        },
+        {
+          "id": 3,
+          "first_name": "Three",
+          "category": "Старшая",
+          "in_game":"Нет"
         }
       ]
     }
