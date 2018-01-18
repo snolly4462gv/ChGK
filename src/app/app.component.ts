@@ -53,7 +53,7 @@ export class AppComponent implements OnInit{
   GetPlayers(){
     this.Players = this.service.GetPlayers();
     this.TeamsCount = this.Players.length;
-    console.log(`players`,this.TeamsCount);
+    //console.log(`players`,this.TeamsCount);
   }
 
   BuildTable(){
@@ -169,7 +169,7 @@ export class AppComponent implements OnInit{
 QAnswer(i:number){
  
   let q = i - Math.floor(i/(this.QuestCount+1));
-  console.log(i,q);
+  //console.log(i,q);
   if(this.QFlag&&q==this.QCurr||!this.QFlag){
   if(this.QFlag)
     document.getElementById("cell_num_q_"+q).style.backgroundColor="white";
@@ -191,7 +191,7 @@ QAnswerApl(){
     document.getElementById("cell_"+player+"_"+this.QCurr).style.backgroundColor="#4CAF50";
     }
   }
-  console.log(this.GameMatrix);
+  //console.log(this.GameMatrix);
   this.QAnswer(this.QCurr);
   this.GetResult();
 }
@@ -219,7 +219,7 @@ QAllDel(){
 
 tableClick(player,question) {
   let q = question-Math.floor(question/(this.QuestCount+1));
-  console.log(q);
+  //console.log(q);
     if (this.GameMatrix[player-1][q-1] == 0){ this.GameMatrix[player-1][q-1] = 1;
       document.getElementById("cell_"+player+"_"+q).style.backgroundColor="#4CAF50";
     }
@@ -233,7 +233,7 @@ tableClick(player,question) {
 
 
   GetResult(){
-  //console.log(this.GameMatrix);
+  ////console.log(this.GameMatrix);
   //this.Result = "ok "+this.GameMatrix[0]+"   ("+this.SumArray(this.GameMatrix,0)+") ";
   this.GameScore = [];
   for (let j=1;j<=this.RaundCount;j++)
@@ -255,7 +255,9 @@ tableClick(player,question) {
   this.GetInGameRating();
 
   this.AllResultTable();
-  this.CategoryResultsTable()
+  this.CategoryResultsTable();
+
+  this.GetAnalisResult();
 
 }
 
@@ -273,7 +275,7 @@ GetAllGameRating(){
      if(this.GameMatrix[j][i]==1)this.GameRating[j]+=rtq;
     }
   }
-  console.log(`rating Q`,this.GameAllQuestionRating);
+  //console.log(`rating Q`,this.GameAllQuestionRating);
  // this.Result = "  ||  "+ this.GameRating+"";
 }
 
@@ -284,7 +286,7 @@ GetInGameRating(){
     {if(document.getElementById("pl_ingame_"+i).textContent=="Да")
       {
         countInGame++;
-      console.log(`INGAME-------------`,i);
+      //console.log(`INGAME-------------`,i);
       }
       this.GameInGameRating.push(0);
     }
@@ -303,8 +305,8 @@ GetInGameRating(){
      if(this.GameMatrix[j][i]==1)this.GameInGameRating[j]+=rtq;
     }
   }
-  this.Result += "  |  "+this.GameInGameRating+"";
- console.log(`rating Q in Game`,this.GameInGameQuestionRating);
+  //this.Result += "  |  "+this.GameInGameRating+"";
+ //console.log(`rating Q in Game`,this.GameInGameQuestionRating);
 }
 
 SumArray(arr:Array<number>,n,m){
@@ -441,7 +443,7 @@ CategoryResultsTable(){
     for(let cc of this.Categories) if(cc==ctg) notNew = true;
      if(!notNew) this.Categories.push(ctg);
      }
-     console.log('cat',this.Categories);
+     //console.log('cat',this.Categories);
 
     
      if(this.HaveResultCat) for(let i=0;i<this.Categories.length;i++)
@@ -451,7 +453,7 @@ CategoryResultsTable(){
    
      for(let k=0;k<this.Categories.length;k++){
 
-          var x = document.createElement("TABLE_CAT");
+          var x = document.createElement("TABLE");
           x.style.padding = "20px";
           x.style.margin = "20px";
           x.setAttribute("id", "myTableCat_"+k);
@@ -497,33 +499,61 @@ CategoryResultsTable(){
              var name = document.getElementById("pl_name_"+u).textContent;
              var score = this.GameScore[i]+"";
              
-            // var ratingInGame = this.GameInGameRating[i]+"";
-            
-            //   if(!ratingInGame||ratingInGame=="undefined") ratingInGame = "";
-            //this.Result += id+") Score:"+ " Rating: "+this.GameRating[i]+" "+ratingInGame+" || ";
 
             var ratingAllCat = 0;
             var ratingCat = 0;
             var countCatEl = 0;
+            var countCatAllEl = 0;
+
+
+            //console.loglog(`\ncategory = `,k,`i = `,i);
+
             for(let t=0;t<this.TeamsCount;t++){
               let uu=t+1;
               if(document.getElementById("pl_cat_"+uu).textContent==this.Categories[k])
-              { 
-                console.log(`cat-`,k,i,t);
-                
-                for(let q=0;q<this.QuestCount*this.RaundCount;q++){
-                  if(this.GameMatrix[i][q]==1)countCatEl++;
-                  // ratingAllCat+=this.GameAllQuestionRating[q]
-                 if(this.GameMatrix[t][q]==1) ratingAllCat+=1;
-                  if(this.GameMatrix[t][q]==1&&document.getElementById("pl_ingame_"+uu).textContent=="Да")
-                    ratingCat+=1;
-                 
-                }
+              {
+                countCatAllEl++;
+                if(document.getElementById("pl_ingame_"+uu).textContent=="Да")  countCatEl++;
               }
-              
             }
-            ratingAllCat = countCatEl-ratingAllCat+1;
-            ratingCat = countCatEl-ratingCat+1;
+            //console.loglog(`Элементы категории = `,countCatAllEl,` в зачёте = `,countCatEl);
+            
+
+
+            //по вопросам для данного i
+            for(let q=0;q<this.QuestCount*this.RaundCount;q++){
+              //если вопрос отвечен - смотри сколько ещё из данной категории на него ответили
+              let tmp_count = 0;
+              if(this.GameMatrix[i][q]==1){
+                for(let t=0;t<this.TeamsCount;t++){
+                  let uu=t+1;
+                  if(document.getElementById("pl_cat_"+uu).textContent==this.Categories[k] && this.GameMatrix[t][q]==1)
+                  tmp_count++;
+                }
+                tmp_count = countCatAllEl - tmp_count +1 ;
+                ratingAllCat+=tmp_count;
+              }
+            }
+
+            for(let q=0;q<this.QuestCount*this.RaundCount;q++){
+              //если вопрос отвечен - смотри сколько ещё из данной категории на него ответили
+              let tmp_count = 0;
+              if(this.GameMatrix[i][q]==1){
+                for(let t=0;t<this.TeamsCount;t++){
+                  let uu=t+1;
+                  if(document.getElementById("pl_cat_"+uu).textContent==this.Categories[k] && this.GameMatrix[t][q]==1 && (document.getElementById("pl_ingame_"+uu).textContent=="Да"))
+                  tmp_count++;
+                }
+                tmp_count = countCatEl - tmp_count +1 ;
+                ratingCat+=tmp_count;
+              }
+            }
+
+            if(document.getElementById("pl_ingame_"+u).textContent!="Да") ratingCat = 0;
+
+
+
+           
               
 
 
@@ -571,6 +601,40 @@ CategoryResultsTable(){
 
 }
 
+GetAnalisResult(){
+  this.Result = "RESULT: ";
+  console.log("\n"); console.log("\n");
+  for(let k=0;k<this.Categories.length;k++){
+    this.Result+=(k+1)+") ";
+    var tbl = document.getElementById("myTableCat_"+k);
+    var id:number[]=[];
+    var name:string[]=[];
+    var score:number[]=[];
+    var rating:number[]=[];
+    for(let i=1;i<tbl.children.length;i++){
+     id.push(+tbl.children[i].childNodes[0].textContent);
+     name.push(tbl.children[i].childNodes[1].textContent+"");
+     score.push(+tbl.children[i].childNodes[2].textContent);
+     rating.push(+tbl.children[i].childNodes[3].textContent);
+    }
+    console.log(id,name,score,rating);
+    
+    let count = 0;
+    while(count<score.length){
+      console.log(`sc`,score);
+      count++;
+      let max = score[0],max_i=0;
+      for(let i=0;i<score.length;i++){
+        if(score[i]>max){max = score[i];max_i=i;}
+      }
+      this.Result+=id[max_i]+". "+name[max_i]+" "+score[max_i]+" ("+rating[max_i]+");  \n";
+      score[max_i]=-1;
+    }
+
+    console.log("\n");
+  
+  }
+}
 
 
 }
