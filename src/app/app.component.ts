@@ -53,6 +53,7 @@ export class AppComponent implements OnInit{
   GetPlayers(){
     this.Players = this.service.GetPlayers();
     this.TeamsCount = this.Players.length;
+    console.log(`players`,this.TeamsCount);
   }
 
   BuildTable(){
@@ -278,11 +279,15 @@ GetAllGameRating(){
 
 GetInGameRating(){
   this.GameInGameRating = [];
-
+  var countInGame = 0;
   for(let i=1;i<=this.TeamsCount;i++)
-    if(document.getElementById("pl_ingame_"+i).textContent=="Да")
+    {if(document.getElementById("pl_ingame_"+i).textContent=="Да")
+      {
+        countInGame++;
+      console.log(`INGAME-------------`,i);
+      }
       this.GameInGameRating.push(0);
-
+    }
   for(let i=0;i<this.QuestCount*this.RaundCount;i++){
     let rtq = 0;
     for(let j=0;j<this.GameMatrix.length;j++){
@@ -290,7 +295,7 @@ GetInGameRating(){
       if(document.getElementById("pl_ingame_"+u).textContent=="Да")
       rtq+=this.GameMatrix[j][i];
     }
-    rtq = this.GameInGameRating.length -rtq + 1;
+    rtq =  countInGame -rtq + 1;
     this.GameInGameQuestionRating[i] = rtq;
     for(let j=0;j<this.GameMatrix.length;j++){
       let u = j+1;
@@ -298,7 +303,7 @@ GetInGameRating(){
      if(this.GameMatrix[j][i]==1)this.GameInGameRating[j]+=rtq;
     }
   }
- // this.Result += "  |  "+this.GameInGameRating+"";
+  this.Result += "  |  "+this.GameInGameRating+"";
  console.log(`rating Q in Game`,this.GameInGameQuestionRating);
 }
 
@@ -320,7 +325,7 @@ SumArrayAll(arr:Array<number>,n,m){
 }
 
 AllResultTable(){
-  this.Result = "";
+ // this.Result = "";
 
   for(let i=0;i<this.TeamsCount;i++){
     let u=i+1;
@@ -438,16 +443,17 @@ CategoryResultsTable(){
      }
      console.log('cat',this.Categories);
 
-
+    
      if(this.HaveResultCat) for(let i=0;i<this.Categories.length;i++)
      document.getElementById("CATEGOR_TABLES").removeChild(document.getElementById("CATEGOR_TABLES").lastChild);
     this.HaveResultCat = true;
 
-
+   
      for(let k=0;k<this.Categories.length;k++){
 
           var x = document.createElement("TABLE_CAT");
-          x.style.padding = "40px";
+          x.style.padding = "20px";
+          x.style.margin = "20px";
           x.setAttribute("id", "myTableCat_"+k);
           document.getElementById("CATEGOR_TABLES").appendChild(x);
 
@@ -470,6 +476,16 @@ CategoryResultsTable(){
           var t = document.createTextNode("Score");
           z.appendChild(t);
           document.getElementById("myResTrCat_"+k).appendChild(z);
+
+          var z = document.createElement("TD");
+          var t = document.createTextNode("Rating");
+          z.appendChild(t);
+          document.getElementById("myResTrCat_"+k).appendChild(z);
+
+          var z = document.createElement("TD");
+          var t = document.createTextNode("AllRating");
+          z.appendChild(t);
+          document.getElementById("myResTrCat_"+k).appendChild(z);
           
         
         
@@ -482,9 +498,35 @@ CategoryResultsTable(){
              var score = this.GameScore[i]+"";
              
             // var ratingInGame = this.GameInGameRating[i]+"";
-            // var ratingAll = this.GameRating[i]+"";
+            
             //   if(!ratingInGame||ratingInGame=="undefined") ratingInGame = "";
             //this.Result += id+") Score:"+ " Rating: "+this.GameRating[i]+" "+ratingInGame+" || ";
+
+            var ratingAllCat = 0;
+            var ratingCat = 0;
+            var countCatEl = 0;
+            for(let t=0;t<this.TeamsCount;t++){
+              let uu=t+1;
+              if(document.getElementById("pl_cat_"+uu).textContent==this.Categories[k])
+              { 
+                console.log(`cat-`,k,i,t);
+                
+                for(let q=0;q<this.QuestCount*this.RaundCount;q++){
+                  if(this.GameMatrix[i][q]==1)countCatEl++;
+                  // ratingAllCat+=this.GameAllQuestionRating[q]
+                 if(this.GameMatrix[t][q]==1) ratingAllCat+=1;
+                  if(this.GameMatrix[t][q]==1&&document.getElementById("pl_ingame_"+uu).textContent=="Да")
+                    ratingCat+=1;
+                 
+                }
+              }
+              
+            }
+            ratingAllCat = countCatEl-ratingAllCat+1;
+            ratingCat = countCatEl-ratingCat+1;
+              
+
+
             
             var y = document.createElement("TR");
             document.getElementById( "myTableCat_"+k).appendChild(y);
@@ -505,12 +547,24 @@ CategoryResultsTable(){
             z.appendChild(t);
             document.getElementById("myResTrCategory"+u).appendChild(z);
 
+            var z = document.createElement("TD");
+            var t = document.createTextNode(ratingCat+"");
+            z.appendChild(t);
+            document.getElementById("myResTrCategory"+u).appendChild(z);
+
+            var z = document.createElement("TD");
+            var t = document.createTextNode(ratingAllCat+"");
+            z.appendChild(t);
+            document.getElementById("myResTrCategory"+u).appendChild(z);
+
           }
             
             
           }
+
+         
           
- 
+          
      
     }
 
