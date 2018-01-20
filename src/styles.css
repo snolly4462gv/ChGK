@@ -4,5 +4,8 @@ table, td {
     margin: 5px;
 }
 td {
-   width: 26px;
+   width:28px;
+   max-height: 32px;
+   height: 30px;
+   padding: 2px;
 }
